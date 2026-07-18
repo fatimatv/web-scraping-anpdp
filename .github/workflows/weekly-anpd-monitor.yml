@@ -1,0 +1,37 @@
+name: Weekly ANPD Monitor
+
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Dias calendario a revisar
+        default: "7"
+        required: true
+  schedule:
+    # GitHub Actions usa UTC. Mantener sincronizado con ANPD_WEEKLY_CRON_UTC en los secretos/variables del repositorio.
+    - cron: "0 13 * * 1"
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    env:
+      ANPD_USER_AGENT: ${{ vars.ANPD_USER_AGENT || 'anpd-monitor-github-actions/0.1' }}
+      ANPD_DATA_DIR: data
+      ANPD_DATABASE_PATH: data/anpd_monitor.sqlite3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Validate sources
+        run: python -m anpd_monitor validate-sources
+      - name: Run monitor
+        run: python -m anpd_monitor run --days "${{ inputs.days || '7' }}"
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: anpd-monitor-reports
+          path: data/reports/
+

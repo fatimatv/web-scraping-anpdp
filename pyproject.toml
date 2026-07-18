@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anpd-monitor"
+version = "0.1.0"
+description = "Monitor semanal de publicaciones ANPD en Gob.pe"
+requires-python = ">=3.12"
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "requests>=2.31",
+  "python-dotenv>=1.0",
+  "tzdata>=2025.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+include = ["anpd_monitor*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=anpd_monitor --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

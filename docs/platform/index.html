@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web scraping juridico para abogados</title>
+    <meta
+      name="description"
+      content="Plataforma interactiva para explicar a abogados como monitorear jurisprudencia y documentos oficiales con web scraping responsable."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegacion principal">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">IA</span>
+          <div>
+            <strong>Scraping juridico</strong>
+            <small>Guia para abogados</small>
+          </div>
+        </div>
+        <nav class="nav-list" aria-label="Modulos">
+          <button class="nav-item active" type="button" data-view="mapa">Mapa</button>
+          <button class="nav-item" type="button" data-view="fuentes">Fuentes</button>
+          <button class="nav-item" type="button" data-view="criterio">Criterio temporal</button>
+          <button class="nav-item" type="button" data-view="simulador">Simulador</button>
+          <button class="nav-item" type="button" data-view="riesgos">Riesgos</button>
+          <button class="nav-item" type="button" data-view="plantilla">Plantilla</button>
+        </nav>
+      </aside>
+
+      <main id="contenido" class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">De fuente publica a reporte semanal</p>
+            <h1>Aprende a convertir jurisprudencia oficial en un monitor confiable</h1>
+          </div>
+          <div class="progress-panel" aria-live="polite">
+            <span>Progreso</span>
+            <strong id="progressText">0 de 6</strong>
+            <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
+          </div>
+        </header>
+
+        <section class="view active" data-panel="mapa">
+          <div class="section-head">
+            <h2>Mapa del proceso</h2>
+            <p>Piensalo como una diligencia documental repetible: identificar fuente, verificar fecha, descargar evidencia y dejar constancia.</p>
+          </div>
+          <div class="process-board" aria-label="Flujo del web scraping juridico">
+            <button class="process-step selected" type="button" data-step="0">
+              <span>1</span><strong>Fuente oficial</strong><small>Entidad, coleccion, buscador o boletin</small>
+            </button>
+            <button class="process-step" type="button" data-step="1">
+              <span>2</span><strong>Regla juridica</strong><small>Que documentos importan y por que</small>
+            </button>
+            <button class="process-step" type="button" data-step="2">
+              <span>3</span><strong>Fecha verificable</strong><small>Publicacion oficial, no fecha del PDF</small>
+            </button>
+            <button class="process-step" type="button" data-step="3">
+              <span>4</span><strong>Descarga</strong><small>Solo archivos publicos y validos</small>
+            </button>
+            <button class="process-step" type="button" data-step="4">
+              <span>5</span><strong>Trazabilidad</strong><small>Hash, URL, hora y estado</small>
+            </button>
+            <button class="process-step" type="button" data-step="5">
+              <span>6</span><strong>Reporte</strong><small>Novedades o ausencia expresa</small>
+            </button>
+          </div>
+          <article class="detail-card" id="stepDetail"></article>
+        </section>
+
+        <section class="view" data-panel="fuentes">
+          <div class="section-head">
+            <h2>Diagnostico de fuentes</h2>
+            <p>Antes de programar, un abogado debe saber si la fuente permite una revision automatizada responsable.</p>
+          </div>
+          <div class="checklist-grid">
+            <label><input type="checkbox" data-check /> La pagina pertenece al dominio oficial de la entidad.</label>
+            <label><input type="checkbox" data-check /> Existe una fecha publica visible para cada documento.</label>
+            <label><input type="checkbox" data-check /> El documento tiene enlace permanente o identificador estable.</label>
+            <label><input type="checkbox" data-check /> El PDF se descarga sin autenticacion ni CAPTCHA.</label>
+            <label><input type="checkbox" data-check /> La pagina conserva resultados historicos paginados.</label>
+            <label><input type="checkbox" data-check /> Se revisaron reglas tecnicas como robots.txt y limites razonables.</label>
+          </div>
+          <div class="status-box" id="checkStatus">Marca los puntos que cumple tu fuente.</div>
+        </section>
+
+        <section class="view" data-panel="criterio">
+          <div class="section-head">
+            <h2>Criterio temporal</h2>
+            <p>El error mas comun es confundir la fecha de publicacion con la fecha de emision del acto.</p>
+          </div>
+          <div class="date-lab">
+            <label>
+              Fecha de ejecucion
+              <input id="runDate" type="date" />
+            </label>
+            <label>
+              Dias hacia atras
+              <input id="daysBack" type="number" min="1" max="60" value="7" />
+            </label>
+            <button class="primary-action" id="calculateWindow" type="button">Calcular periodo</button>
+          </div>
+          <div class="result-box" id="windowResult"></div>
+          <div class="note-strip">
+            <strong>Regla practica:</strong> si no puedes probar la fecha oficial de publicacion, no lo trates como novedad automatica; envialo a revision manual.
+          </div>
+        </section>
+
+        <section class="view" data-panel="simulador">
+          <div class="section-head">
+            <h2>Simulador de clasificacion</h2>
+            <p>Pega un titulo de resolucion, opinion o decision para ver como se clasifica y que metadatos conviene guardar.</p>
+          </div>
+          <textarea id="titleInput" rows="4">Resolucion Directoral N.° PAS: MUNICIPALIDAD DISTRITAL EJEMPLO (EXP. 123-2026)</textarea>
+          <button class="primary-action" id="classifyButton" type="button">Clasificar documento</button>
+          <div class="metadata-output" id="metadataOutput"></div>
+        </section>
+
+        <section class="view" data-panel="riesgos">
+          <div class="section-head">
+            <h2>Riesgos y controles</h2>
+            <p>Automatizar no significa bajar todo sin criterio. La confianza del reporte depende de controles simples y visibles.</p>
+          </div>
+          <div class="risk-matrix">
+            <article><strong>Fecha dudosa</strong><span>Revision manual, sin descarga automatica.</span></article>
+            <article><strong>PDF invalido</strong><span>Verificar firma `%PDF-` y tamano minimo.</span></article>
+            <article><strong>Duplicado</strong><span>Comparar URL, identificador del portal y SHA-256.</span></article>
+            <article><strong>Falla parcial</strong><span>Registrar error por fuente y continuar con las demas.</span></article>
+            <article><strong>Cambio HTML</strong><span>Alertar cuando antes habia resultados y ahora no se extrae nada.</span></article>
+            <article><strong>Uso excesivo</strong><span>Pausas, reintentos moderados y User-Agent identificable.</span></article>
+          </div>
+        </section>
+
+        <section class="view" data-panel="plantilla">
+          <div class="section-head">
+            <h2>Plantilla para nueva entidad</h2>
+            <p>Usa este formulario como minuta de levantamiento antes de pedir o construir el scraper.</p>
+          </div>
+          <form class="brief-form">
+            <label>Entidad publica<input type="text" placeholder="Ej. Tribunal Fiscal" /></label>
+            <label>URL oficial<input type="url" placeholder="https://..." /></label>
+            <label>Tipo de documentos<input type="text" placeholder="Resoluciones, informes, sanciones..." /></label>
+            <label>Criterio juridico<textarea rows="3" placeholder="Que entra, que se excluye y por que"></textarea></label>
+            <label>Frecuencia<select><option>Semanal</option><option>Diaria</option><option>Mensual</option></select></label>
+          </form>
+          <button class="primary-action" id="copyBrief" type="button">Generar resumen</button>
+          <pre class="brief-output" id="briefOutput"></pre>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>
