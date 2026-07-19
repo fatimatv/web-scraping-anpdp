@@ -8,4 +8,4 @@ data/
 dist/
 build/
 *.egg-info/
-
+tmp_ialaw_brand_skill/
