@@ -62,23 +62,28 @@ select {
 }
 
 .brand-lockup {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  display: grid;
+  gap: 14px;
+  align-items: start;
   padding-bottom: 24px;
   border-bottom: 2px solid var(--ialaw-blue);
   margin-bottom: 22px;
 }
 
 .brand-logo {
-  width: 118px;
+  width: 172px;
   height: auto;
-  flex: 0 0 auto;
 }
 
 .brand-lockup strong,
 .brand-lockup small {
   display: block;
+}
+
+.brand-lockup strong {
+  color: var(--ialaw-blue);
+  font-size: 1.05rem;
+  line-height: 1.22;
 }
 
 .brand-lockup small {
@@ -92,10 +97,12 @@ select {
 }
 
 .toc a {
-  color: var(--ink);
+  color: var(--ialaw-blue);
   text-decoration: none;
   border: 1px solid transparent;
   padding: 12px;
+  border-radius: 999px;
+  font-weight: 800;
 }
 
 .toc a:hover,
@@ -129,17 +136,6 @@ select {
   overflow: hidden;
 }
 
-.hero::after {
-  content: "";
-  position: absolute;
-  right: 28px;
-  top: 28px;
-  width: 120px;
-  height: 20px;
-  border-radius: 999px;
-  background: var(--ialaw-yellow);
-}
-
 .eyebrow {
   margin: 0 0 12px;
   color: var(--ialaw-blue);
@@ -158,8 +154,8 @@ p {
 
 h1 {
   max-width: 980px;
-  font-size: clamp(2.4rem, 6vw, 6.2rem);
-  line-height: 0.94;
+  font-size: clamp(2.1rem, 4.35vw, 4.85rem);
+  line-height: 1.02;
   margin-bottom: 22px;
   color: var(--ialaw-blue);
 }
@@ -168,11 +164,13 @@ h2 {
   font-size: clamp(1.6rem, 3.2vw, 3.2rem);
   line-height: 1;
   margin-bottom: 0;
+  color: var(--ialaw-blue);
 }
 
 h3 {
   font-size: 1rem;
   margin-bottom: 8px;
+  color: var(--ialaw-blue);
 }
 
 .hero-copy,
@@ -242,9 +240,10 @@ h3 {
   display: grid;
   place-items: center;
   height: 56px;
-  background: var(--ink);
+  background: var(--ialaw-blue);
   color: white;
   font-weight: 900;
+  border-radius: 999px;
 }
 
 .callout,
