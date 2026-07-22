@@ -22,7 +22,11 @@ python -m anpd_monitor validate-sources
 
 ## Plataforma interactiva para abogados
 
-El manual interactivo esta en `docs/platform/index.html` y desplegado en Vercel. Explica, paso a paso y para abogados no ingenieros, como pedirle a la IA un scraper juridico, que herramientas instalar, que hace tecnicamente el sistema y que controles legales aplicar al monitorear jurisprudencia o documentos oficiales de cualquier entidad publica.
+El manual interactivo esta en `docs/platform/index.html` y desplegado en Vercel:
+
+https://web-scraping-juridico.vercel.app
+
+Explica, paso a paso y para abogados no ingenieros, como pedirle a la IA un scraper juridico, que herramientas instalar, que hace tecnicamente el sistema y que controles legales aplicar al monitorear jurisprudencia o documentos oficiales de cualquier entidad publica.
 
 La zona horaria operacional es `America/Lima`. El criterio temporal usa la fecha oficial de publicacion mostrada por Gob.pe, no la fecha de emision del documento ni la fecha tecnica del PDF.
 
