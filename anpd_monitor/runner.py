@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from datetime import datetime
+from pathlib import Path
 
 from .config import COLLECTIONS, Settings
 from .dates import build_window, now_lima
@@ -58,6 +60,7 @@ def run_monitor(
                 LOGGER.exception(message)
                 result.errors.append(message)
         md_path, json_path = generate_reports(settings.data_dir, run_dt, window, source_results)
+        _mirror_dashboard_for_vercel(settings.data_dir)
         return str(md_path), str(json_path)
     finally:
         if repository is None:
@@ -125,6 +128,17 @@ def _process_candidates(
         result.new_documents.append(processed)
         repo.upsert(processed, run_dt)
     return continue_pages
+
+
+def _mirror_dashboard_for_vercel(data_dir: Path) -> None:
+    # ponytail: Vercel sirve docs/platform/ como root del sitio, por eso el dashboard va adentro
+    src = data_dir / "reports" / "dashboard.html"
+    platform_dir = data_dir.parent / "docs" / "platform"
+    if not src.exists() or not platform_dir.is_dir():
+        return
+    dest_dir = platform_dir / "dashboard"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(src, dest_dir / "index.html")
 
 
 def validate_sources(settings: Settings) -> list[SourceResult]:

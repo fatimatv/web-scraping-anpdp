@@ -3,7 +3,7 @@ from datetime import datetime
 from anpd_monitor.config import Settings
 from anpd_monitor.dates import LIMA_TZ
 from anpd_monitor.repository import DocumentRepository
-from anpd_monitor.runner import run_monitor
+from anpd_monitor.runner import _mirror_dashboard_for_vercel, run_monitor
 
 
 class FakeClient:
@@ -166,3 +166,20 @@ def test_runner_sends_missing_date_to_manual_review(tmp_path):
         run_at=datetime(2026, 7, 18, 16, 0, tzinfo=LIMA_TZ),
     )
     assert "Total de documentos para revision manual: 1" in open(md_path, encoding="utf-8").read()
+
+
+def test_mirror_dashboard_copies_into_platform_when_platform_exists(tmp_path):
+    data_dir = tmp_path / "data"
+    (data_dir / "reports").mkdir(parents=True)
+    (data_dir / "reports" / "dashboard.html").write_text("<html>x</html>", encoding="utf-8")
+    (tmp_path / "docs" / "platform").mkdir(parents=True)
+    _mirror_dashboard_for_vercel(data_dir)
+    assert (tmp_path / "docs" / "platform" / "dashboard" / "index.html").read_text(encoding="utf-8") == "<html>x</html>"
+
+
+def test_mirror_dashboard_noop_when_platform_missing(tmp_path):
+    data_dir = tmp_path / "data"
+    (data_dir / "reports").mkdir(parents=True)
+    (data_dir / "reports" / "dashboard.html").write_text("<html>x</html>", encoding="utf-8")
+    _mirror_dashboard_for_vercel(data_dir)
+    assert not (tmp_path / "docs").exists()
