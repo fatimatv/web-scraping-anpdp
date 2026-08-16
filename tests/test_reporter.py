@@ -40,6 +40,13 @@ def test_dashboard_html_generated_and_embeds_payload(tmp_path):
     assert "safeUrl" in dashboard
     # No debe existir el marcador sin sustituir
     assert "__REPORT_JSON__" not in dashboard
+    # Tokens del brandbook IALAW
+    assert "--ialaw-blue: #011ef4" in dashboard
+    assert "Poppins" in dashboard
+    # data_dir_abs debe llegar al payload embebido (JSON escapa backslashes -> comparar via json.dumps)
+    import json as _json
+    assert '"data_dir_abs"' in dashboard
+    assert _json.dumps(str(tmp_path.resolve()))[1:-1] in dashboard
 
 
 def test_build_dashboard_html_escapes_script_in_payload():

@@ -28,6 +28,7 @@ def generate_reports(
     md_path = reports_dir / f"{stem}.md"
     dashboard_path = reports_dir / "dashboard.html"
     payload = build_payload(run_at, window, source_results)
+    payload["data_dir_abs"] = str(data_dir.resolve())
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     md_path.write_text(build_markdown(payload), encoding="utf-8")
     dashboard_path.write_text(build_dashboard_html(payload), encoding="utf-8")
@@ -130,65 +131,119 @@ _DASHBOARD_TEMPLATE = r"""<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ANPD Monitor - Panel del ultimo run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f6f5f1;
-    --card: #ffffff;
-    --ink: #1a1f2b;
-    --muted: #5b6472;
-    --line: #e3e1da;
+    --ink: #111111;
+    --paper: #ffffff;
+    --muted: #6f7072;
+    --line: #d4d5d5;
+    --ialaw-blue: #011ef4;
+    --ialaw-blue-dark: #0118bf;
+    --ialaw-yellow: #fbbb02;
+    --ialaw-yellow-light: #ffe981;
     --ok: #2f7d5b;
     --warn: #b8791f;
     --err: #b23a3a;
-    --accent: #1a1f2b;
+    --shadow: 0 18px 44px rgba(1, 30, 244, 0.13);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
-    font: 15px/1.5 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-  main { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
-  header { border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 28px; }
-  h1 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; }
-  header p { margin: 2px 0; color: var(--muted); font-size: 14px; }
-  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
-  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
-  .kpi .n { font-size: 26px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
-  .kpi .lbl { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--ink);
+    background:
+      linear-gradient(90deg, rgba(1, 30, 244, 0.055) 1px, transparent 1px) 0 0 / 34px 34px,
+      linear-gradient(180deg, #ffffff, #f7f8ff);
+    font-family: Poppins, Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 1000px; margin: 0 auto; padding: 34px 24px 80px; }
+  .hero {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid var(--line);
+    border-top: 12px solid var(--ialaw-blue);
+    border-radius: 18px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .eyebrow {
+    margin: 0 0 10px; color: var(--ialaw-blue);
+    font-size: 0.78rem; text-transform: uppercase; font-weight: 900;
+  }
+  h1 { margin: 0 0 12px; font-size: clamp(1.7rem, 3vw, 2.4rem); color: var(--ialaw-blue); line-height: 1.05; }
+  .hero p { margin: 4px 0; color: var(--muted); font-size: 0.98rem; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi {
+    background: var(--paper); border: 1px solid var(--ialaw-blue);
+    border-radius: 18px; padding: 18px; box-shadow: var(--shadow);
+  }
+  .kpi .n { font-size: 2.2rem; font-weight: 900; line-height: 1; margin-bottom: 6px; color: var(--ialaw-blue); }
+  .kpi .lbl { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; }
   .kpi.err .n { color: var(--err); }
   .kpi.warn .n { color: var(--warn); }
   .kpi.ok .n { color: var(--ok); }
-  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-    padding: 18px 20px; margin-bottom: 18px; }
-  section h2 { margin: 0 0 12px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--muted); font-weight: 600; }
+  section {
+    background: rgba(255, 255, 255, 0.72); border: 1px solid var(--line);
+    border-radius: 18px; padding: 22px 24px; margin-bottom: 18px;
+  }
+  section h2 {
+    margin: 0 0 14px; font-size: 0.85rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--ialaw-blue); font-weight: 900;
+    border-bottom: 2px solid var(--ialaw-blue); padding-bottom: 8px;
+  }
   ul.sources { list-style: none; padding: 0; margin: 0; }
-  ul.sources li { display: flex; align-items: baseline; gap: 10px; padding: 8px 0;
-    border-bottom: 1px dashed var(--line); font-size: 14px; }
+  ul.sources li {
+    display: flex; align-items: baseline; gap: 10px; padding: 10px 0;
+    border-bottom: 1px dashed var(--line); font-size: 0.92rem;
+  }
   ul.sources li:last-child { border-bottom: 0; }
-  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600;
-    letter-spacing: 0.04em; text-transform: uppercase; }
+  .badge {
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 999px; font-weight: 800;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
   .badge.ok { background: #e6f2ec; color: var(--ok); }
   .badge.err { background: #f7e1e1; color: var(--err); }
   .source-title { flex: 1; }
-  .source-meta { color: var(--muted); font-size: 13px; }
-  .doc { border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .source-title a { color: var(--ialaw-blue); font-weight: 700; text-decoration: none; }
+  .source-title a:hover { text-decoration: underline; }
+  .source-meta { color: var(--muted); font-size: 0.85rem; }
+  .doc { border-bottom: 1px solid var(--line); padding: 14px 0; }
   .doc:last-child { border-bottom: 0; }
-  .doc h3 { margin: 0 0 4px; font-size: 15px; }
-  .doc .meta { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
-  .doc .links { font-size: 13px; }
-  .doc .links a { color: var(--accent); text-decoration: underline; margin-right: 12px; }
-  code.path { background: #f0eee8; padding: 1px 6px; border-radius: 4px; font-size: 12px; }
-  .empty { color: var(--muted); font-style: italic; }
-  .err-item { color: var(--err); font-size: 13px; padding: 4px 0; }
+  .doc h3 { margin: 0 0 4px; font-size: 1rem; color: var(--ink); }
+  .doc .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 6px; }
+  .doc .links { font-size: 0.85rem; }
+  .doc .links a { color: var(--ialaw-blue); text-decoration: underline; margin-right: 12px; font-weight: 700; }
+  code.path { background: var(--ialaw-yellow-light); padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; }
+  .empty { color: var(--muted); font-style: italic; margin: 0; }
+  .err-item { color: var(--err); font-size: 0.88rem; padding: 4px 0; }
+  .folders { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .folder-card {
+    background: white; border: 1px solid var(--ialaw-blue); border-radius: 14px;
+    padding: 14px 16px; display: grid; gap: 8px;
+  }
+  .folder-card b { color: var(--ialaw-blue); font-weight: 800; }
+  .folder-card code { font-size: 0.75rem; color: var(--muted); word-break: break-all; }
+  .folder-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    border: 1px solid var(--ink); background: white; color: var(--ink);
+    padding: 8px 14px; border-radius: 999px; font-weight: 800; font-size: 0.8rem;
+    cursor: pointer; text-decoration: none; display: inline-block;
+  }
+  .btn.primary { background: var(--ialaw-blue); color: white; border-color: var(--ialaw-blue); }
+  .btn:hover, .btn:focus-visible { background: var(--ink); color: white; outline: none; }
+  .btn.primary:hover, .btn.primary:focus-visible { background: var(--ialaw-blue-dark); border-color: var(--ialaw-blue-dark); }
   @media (max-width: 640px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>ANPD Monitor</h1>
+  <section class="hero">
+    <p class="eyebrow">IALAW DIGITAL LAWYERS / ANPD Monitor</p>
+    <h1>Panel del &uacute;ltimo run</h1>
     <p id="run-at"></p>
     <p id="period"></p>
-  </header>
+  </section>
 
   <div class="grid">
     <div class="kpi ok"><div class="n" id="k-new">0</div><div class="lbl">Nuevos</div></div>
@@ -200,6 +255,11 @@ _DASHBOARD_TEMPLATE = r"""<!doctype html>
   <section>
     <h2>Fuentes consultadas</h2>
     <ul class="sources" id="sources"></ul>
+  </section>
+
+  <section id="folders-section" hidden>
+    <h2>Carpetas de PDFs</h2>
+    <div class="folders" id="folders"></div>
   </section>
 
   <section>
@@ -291,6 +351,42 @@ _DASHBOARD_TEMPLATE = r"""<!doctype html>
     document.getElementById("errors-section").hidden = false;
     document.getElementById("errors").innerHTML =
       data.errors.map(e => `<div class="err-item">${esc(e)}</div>`).join("");
+  }
+
+  // Bloque "Carpetas de PDFs": una tarjeta por categoria con al menos un doc nuevo o en manual review.
+  // Local (file://) -> boton "Abrir carpeta" que lanza Explorer. Online -> "Copiar ruta".
+  const catLabels = { sancionadores: "Procedimientos sancionadores", arco: "Derechos ARCO", opiniones: "Opiniones consultivas" };
+  const cats = new Set([...data.new_documents, ...data.manual_review].map(d => d.category).filter(Boolean));
+  if (cats.size && data.data_dir_abs) {
+    const sep = data.data_dir_abs.includes("\\") ? "\\" : "/";
+    const isLocal = location.protocol === "file:";
+    const cards = [...cats].map(cat => {
+      const abs = data.data_dir_abs + sep + cat;
+      const fileHref = "file:///" + abs.replace(/\\/g, "/").replace(/ /g, "%20");
+      const openBtn = isLocal
+        ? `<a class="btn primary" href="${esc(fileHref)}" target="_blank" rel="noopener">Abrir carpeta</a>`
+        : "";
+      return `
+        <div class="folder-card">
+          <b>${esc(catLabels[cat] || cat)}</b>
+          <code>${esc(abs)}</code>
+          <div class="actions">
+            ${openBtn}
+            <button class="btn" type="button" data-copy-path="${esc(abs)}">Copiar ruta</button>
+          </div>
+        </div>`;
+    });
+    document.getElementById("folders").innerHTML = cards.join("");
+    document.getElementById("folders-section").hidden = false;
+    document.querySelectorAll("[data-copy-path]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(btn.dataset.copyPath); }
+        catch { return; }
+        const prev = btn.textContent;
+        btn.textContent = "Copiado";
+        setTimeout(() => { btn.textContent = prev; }, 1200);
+      });
+    });
   }
 </script>
 </body>
