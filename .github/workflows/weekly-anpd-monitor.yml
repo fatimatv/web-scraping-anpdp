@@ -34,4 +34,14 @@ jobs:
         with:
           name: anpd-monitor-reports
           path: data/reports/
+      - name: Deploy dashboard to Vercel
+        if: success() && env.VERCEL_TOKEN != ''
+        working-directory: docs/platform
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_kR8Ga3bEldZpM89TfeQ3zaen
+          VERCEL_PROJECT_ID: prj_HPejjxce9N8T77NaItvdz3kn0i1W
+        run: |
+          npm install --global vercel@latest
+          vercel deploy --prod --yes --token="$VERCEL_TOKEN"
 
