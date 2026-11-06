@@ -23,6 +23,27 @@ def test_report_generated_with_exact_no_news_message(tmp_path):
     ) in md
 
 
+def test_dashboard_keeps_existing_documents_visible():
+    from anpd_monitor.models import Category, ProcessedDocument, ProcessingStatus
+    from anpd_monitor.reporter import build_dashboard_html, build_payload
+
+    run_at = datetime(2026, 11, 6, 12, 0, tzinfo=LIMA_TZ)
+    result = SourceResult(source=COLLECTIONS["sancionadores"], status="ok")
+    result.existing_documents.append(
+        ProcessedDocument(
+            category=Category.SANCIONADORES,
+            title="Banco Internacional del Peru",
+            publication_url="https://www.gob.pe/institucion/anpd/normas-legales/8761514-test",
+            portal_id="8761514",
+            publication_date=datetime(2026, 9, 23, tzinfo=LIMA_TZ),
+            status=ProcessingStatus.EXISTING,
+        )
+    )
+    html = build_dashboard_html(build_payload(run_at, build_window(60, run_at), [result]))
+    assert 'id="existing-docs"' in html
+    assert "data.existing_documents.map(renderDoc)" in html
+
+
 def test_dashboard_html_generated_and_embeds_payload(tmp_path):
     run_at = datetime(2026, 7, 18, 16, 0, tzinfo=LIMA_TZ)
     window = build_window(7, run_at)

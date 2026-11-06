@@ -5,7 +5,7 @@ on:
     inputs:
       days:
         description: Dias calendario a revisar
-        default: "7"
+        default: "60"
         required: true
   schedule:
     # GitHub Actions usa UTC. Mantener sincronizado con ANPD_WEEKLY_CRON_UTC en los secretos/variables del repositorio.
@@ -27,8 +27,18 @@ jobs:
         run: python -m pip install -e ".[dev]"
       - name: Validate sources
         run: python -m anpd_monitor validate-sources
+      - name: Restore processed-document history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for run_id in $(gh run list --workflow "Weekly ANPD Monitor" --status success --limit 10 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$run_id" --name anpd-monitor-state --dir data 2>/dev/null; then
+              echo "Restored database from run $run_id"
+              break
+            fi
+          done
       - name: Run monitor
-        run: python -m anpd_monitor run --days "${{ inputs.days || '7' }}"
+        run: python -m anpd_monitor run --days "${{ inputs.days || '60' }}"
       - name: Read run summary
         id: summary
         run: |
@@ -49,6 +59,12 @@ jobs:
         with:
           name: anpd-monitor-reports
           path: data/reports/
+      - name: Save processed-document history
+        uses: actions/upload-artifact@v4
+        with:
+          name: anpd-monitor-state
+          path: data/anpd_monitor.sqlite3
+          retention-days: 90
       - name: Deploy dashboard to Vercel
         if: success() && env.VERCEL_TOKEN != ''
         working-directory: docs/platform

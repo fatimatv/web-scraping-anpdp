@@ -267,6 +267,11 @@ _DASHBOARD_TEMPLATE = r"""<!doctype html>
     <div id="new-docs"></div>
   </section>
 
+  <section id="existing-section" hidden>
+    <h2>Documentos ya registrados en el periodo</h2>
+    <div id="existing-docs"></div>
+  </section>
+
   <section id="manual-section" hidden>
     <h2>Revisi&oacute;n manual</h2>
     <div id="manual-docs"></div>
@@ -340,6 +345,11 @@ _DASHBOARD_TEMPLATE = r"""<!doctype html>
     newDocs.innerHTML = data.new_documents.map(renderDoc).join("");
   } else {
     newDocs.innerHTML = `<p class="empty">${esc(data.no_news_message || "Sin novedades en el periodo.")}</p>`;
+  }
+
+  if (data.existing_documents.length) {
+    document.getElementById("existing-section").hidden = false;
+    document.getElementById("existing-docs").innerHTML = data.existing_documents.map(renderDoc).join("");
   }
 
   if (data.manual_review.length) {

@@ -54,6 +54,7 @@ Siempre se genera reporte Markdown y JSON, incluso cuando no hay novedades.
 ## Automatizacion
 
 El workflow de GitHub Actions usa `ANPD_WEEKLY_CRON_UTC` como referencia documentada. Los cron de GitHub Actions se expresan en UTC; ajuste el horario segun la ventana deseada en Lima.
+La ejecucion programada revisa los ultimos 60 dias para captar publicaciones incorporadas tarde con fecha oficial anterior. La base SQLite se restaura desde el artefacto de la ejecucion anterior y se vuelve a guardar al final, para que una resolucion ya detectada no se reporte como nueva otra vez.
 
 ## Scraping responsable
 
